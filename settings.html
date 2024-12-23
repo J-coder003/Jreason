@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - Jreason Chat App</title>
+    <link rel="stylesheet" href="settings.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+</head>
+<body>
+    <div class="settings-container">
+        <h2>Settings</h2>
+        <ul>
+            <li><a href="#" id="account-settings">Account</a></li>
+            <li><a href="#" id="chat-settings">Chats</a></li>
+            <li><a href="#" id="notifications-settings">Notifications</a></li>
+            <li><a href="#" id="storage-settings">Storage and Data</a></li>
+            <li><a href="#" id="help-settings">Help</a></li>
+        </ul>
+    </div>
+
+    <!-- Two-Step Verification Modal -->
+    <div id="two-step-verification-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-two-step-verification">&times;</span>
+            <h3>Enable Two-Step Verification</h3>
+            <button id="two-step-verification">Enable</button>
+        </div>
+    </div>
+
+    <!-- Chat Backup Modal -->
+    <div id="chat-backup-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-chat-backup">&times;</span>
+            <h3>Backup Your Chats</h3>
+            <button id="backup-chats">Backup Now</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAqmks-u3TnimYz9tduyTliB2dR3jbVgUU",
+            authDomain: "reason-bf25a.firebaseapp.com",
+            projectId: "reason-bf25a",
+            storageBucket: "reason-bf25a.appspot.com",
+            messagingSenderId: "62034867138",
+            appId: "1:62034867138:web:1d1fea9a00b2d32e289c5b"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Open and close modals
+            const twoStepModal = document.getElementById('two-step-verification-modal');
+            const chatBackupModal = document.getElementById('chat-backup-modal');
+
+            document.getElementById('account-settings').addEventListener('click', () => {
+                twoStepModal.style.display = 'block';
+            });
+            document.getElementById('chat-settings').addEventListener('click', () => {
+                chatBackupModal.style.display = 'block';
+            });
+
+            document.getElementById('close-two-step-verification').addEventListener('click', () => {
+                twoStepModal.style.display = 'none';
+            });
+            document.getElementById('close-chat-backup').addEventListener('click', () => {
+                chatBackupModal.style.display = 'none';
+            });
+
+            // Two-Step Verification using localStorage
+            document.getElementById('two-step-verification').addEventListener('click', () => {
+                const phoneNumber = prompt("Enter your phone number for OTP (e.g., +1234567890):");
+
+                if (phoneNumber) {
+                    const verificationCode = Math.floor(100000 + Math.random() * 900000); // Generate a random 6-digit OTP
+                    localStorage.setItem('twoStepVerificationCode', verificationCode);
+                    alert('Your OTP is: ' + verificationCode);
+
+                    const userOtp = prompt('Enter the OTP sent to your phone:');
+                    if (parseInt(userOtp) === verificationCode) {
+                        localStorage.setItem('isTwoStepEnabled', 'true');
+                        alert('Two-step verification enabled successfully.');
+                        twoStepModal.style.display = 'none';
+                    } else {
+                        alert('Incorrect OTP. Two-step verification failed.');
+                    }
+                }
+            });
+
+            // Chat Backup using localStorage
+            document.getElementById('backup-chats').addEventListener('click', () => {
+                const chats = JSON.parse(localStorage.getItem('chats')) || [];
+                if (chats.length > 0) {
+                    localStorage.setItem('chatBackup', JSON.stringify(chats));
+                    alert('Chats backed up successfully to local storage.');
+                    chatBackupModal.style.display = 'none';
+                } else {
+                    alert('No chats available to back up.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

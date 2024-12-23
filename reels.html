@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reels - Jreason Chat App</title>
+    <link rel="stylesheet" href="reels.css">
+</head>
+<body>
+    <div class="reels-container">
+        <h2>My Reels</h2>
+        <button id="create-reel">Create New Reel</button>
+        <div id="reels-list" class="reels-list">
+            <!-- Reels will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Create Reel Modal -->
+    <div id="create-reel-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-create-reel">&times;</span>
+            <h3>Create a New Reel</h3>
+            <input type="text" id="reel-title" placeholder="Enter reel title">
+            <textarea id="reel-description" placeholder="Enter description"></textarea>
+            <input type="file" id="reel-file" accept="video/*">
+            <button id="save-reel">Save Reel</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const createReelModal = document.getElementById('create-reel-modal');
+
+            document.getElementById('create-reel').addEventListener('click', () => {
+                createReelModal.style.display = 'block';
+            });
+
+            document.getElementById('close-create-reel').addEventListener('click', () => {
+                createReelModal.style.display = 'none';
+            });
+
+            document.getElementById('save-reel').addEventListener('click', () => {
+                const title = document.getElementById('reel-title').value;
+                const description = document.getElementById('reel-description').value;
+                const file = document.getElementById('reel-file').files[0];
+
+                if (title && description && file) {
+                    const reels = JSON.parse(localStorage.getItem('reels')) || [];
+                    reels.push({ title, description, file: URL.createObjectURL(file) });
+                    localStorage.setItem('reels', JSON.stringify(reels));
+                    createReelModal.style.display = 'none';
+                    alert('Reel created successfully!');
+                    loadReels();
+                } else {
+                    alert('Please fill all fields and select a file.');
+                }
+            });
+
+            function loadReels() {
+                const reelsList = document.getElementById('reels-list');
+                reelsList.innerHTML = '';
+                const reels = JSON.parse(localStorage.getItem('reels')) || [];
+                reels.forEach(reel => {
+                    const reelElement = document.createElement('div');
+                    reelElement.classList.add('reel-item');
+                    reelElement.innerHTML = `
+                        <h4>${reel.title}</h4>
+                        <p>${reel.description}</p>
+                        <video controls src="${reel.file}"></video>
+                    `;
+                    reelsList.appendChild(reelElement);
+                });
+            }
+
+            loadReels();
+        });
+    </script>
+</body>
+</html>

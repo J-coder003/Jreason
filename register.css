@@ -1,0 +1,81 @@
+/* Light and Dark Mode */
+body.light {
+    background-color: #f4f4f4;
+    color: black;
+  }
+  
+  body.dark {
+    background-color: #1e1e1e;
+    color: white;
+  }
+  
+  /* Apply dark mode to chat box and controls */
+  .dark-theme {
+    background-color: #333 !important;
+    color: white !important;
+  }
+  
+  /* Sidebar Styling */
+  #sidebar {
+    width: 200px;
+    float: left;
+    background-color: #80CCFF;
+    height: 100vh; /* Full height sidebar */
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Chat Controls Styling */
+  .chat-controls {
+    background-color: #007bff;
+    padding: 8px;
+    display: flex;
+    gap: 5px;
+    border-radius: 5px;
+  }
+  
+  .control-nav {
+    display: none;
+    flex-direction: column;
+    background-color: #007bff;
+  }
+  
+  /* Chat Box Styling */
+  #chat-box {
+    background-color: #cceeff;
+    padding: 20px;
+    flex: 1;
+    margin-bottom: 10px;
+    overflow-y: auto;
+    border-radius: 5px;
+  }
+  
+  /* Profile section styling */
+  #profile-section {
+    background-color: #cceeff;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  /* New client name in blue header */
+  .blue-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  /* Styles for enlarged image modal */
+  .image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  

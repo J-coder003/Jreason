@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Settings - Jreason</title>
+    <link rel="stylesheet" href="chat-settings.css">
+</head>
+<body>
+    <div class="settings-container">
+        <h2>Chat Settings</h2>
+        <ul>
+            <li><a href="#" id="clear-messages">Clear Messages</a></li>
+            <li><a href="#" id="restore-messages">Restore Messages</a></li>
+            <li><a href="#" id="backup-chat">Backup Chat</a></li>
+            <li><a href="#" id="two-step-verification">Two-Step Verification</a></li>
+            <li><a href="#" id="logout-settings">Logout</a></li>
+        </ul>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-settings-modal">&times;</span>
+            <h3 id="modal-title">Settings</h3>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const settingsModal = document.getElementById('settings-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            const showModal = (title, content) => {
+                modalTitle.textContent = title;
+                modalBody.innerHTML = content;
+                settingsModal.style.display = 'block';
+            };
+
+            document.getElementById('clear-messages').addEventListener('click', () => {
+                showModal('Clear Messages', `
+                    <p>Are you sure you want to clear all messages? This action cannot be undone.</p>
+                    <button id="confirm-clear">Clear Messages</button>
+                `);
+            });
+
+            document.getElementById('restore-messages').addEventListener('click', () => {
+                showModal('Restore Messages', `
+                    <p>Do you want to restore messages from the last backup?</p>
+                    <button id="confirm-restore">Restore Messages</button>
+                `);
+            });
+
+            document.getElementById('backup-chat').addEventListener('click', () => {
+                showModal('Backup Chat', `
+                    <p>Click the button below to backup your chat.</p>
+                    <button id="confirm-backup">Backup Now</button>
+                `);
+            });
+
+            document.getElementById('two-step-verification').addEventListener('click', () => {
+                showModal('Two-Step Verification', `
+                    <p>Enable or disable two-step verification for added security.</p>
+                    <button id="confirm-verification">Toggle Verification</button>
+                `);
+            });
+
+            document.getElementById('logout-settings').addEventListener('click', () => {
+                window.location.href = 'login.html'; // Redirect to login page
+            });
+
+            document.getElementById('close-settings-modal').addEventListener('click', () => {
+                settingsModal.style.display = 'none';
+            });
+
+            document.getElementById('confirm-clear')?.addEventListener('click', () => {
+                localStorage.removeItem('messages');
+                alert('Messages cleared!');
+                settingsModal.style.display = 'none';
+            });
+
+            document.getElementById('confirm-restore')?.addEventListener('click', () => {
+                const backup = localStorage.getItem('chat-backup');
+                if (backup) {
+                    localStorage.setItem('messages', backup);
+                    alert('Messages restored from backup!');
+                } else {
+                    alert('No backup found.');
+                }
+                settingsModal.style.display = 'none';
+            });
+
+            document.getElementById('confirm-backup')?.addEventListener('click', () => {
+                const messages = localStorage.getItem('messages');
+                if (messages) {
+                    localStorage.setItem('chat-backup', messages);
+                    alert('Chat backed up successfully!');
+                } else {
+                    alert('No messages to backup.');
+                }
+                settingsModal.style.display = 'none';
+            });
+
+            document.getElementById('confirm-verification')?.addEventListener('click', () => {
+                const isTwoStepEnabled = localStorage.getItem('two-step-verification') === 'enabled';
+                localStorage.setItem('two-step-verification', isTwoStepEnabled ? 'disabled' : 'enabled');
+                alert(`Two-step verification ${isTwoStepEnabled ? 'disabled' : 'enabled'}!`);
+                settingsModal.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

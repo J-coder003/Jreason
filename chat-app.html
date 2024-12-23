@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jreason Chat App</title>
+  <link rel="stylesheet" href="chat-app.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> <!-- Google Material Icons -->
+  <style>
+    /* Styles for file display */
+    .chat-box img {
+      max-width: 200px;
+      height: auto;
+      margin: 10px 0;
+    }
+
+    .chat-box iframe {
+      width: 100%;
+      height: 500px;
+      margin: 10px 0;
+      border: none;
+    }
+
+    /* Styles for the overlay user details page */
+    #user-details-overlay {
+      display: none; /* Hidden by default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+      z-index: 999; /* Above other content */
+      color: white;
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    /* Cancel button at top-right */
+    #cancel-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Style for the name in the blue header */
+    #client-name {
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body class="light">
+  <div id="sidebar">
+    <h1>Jreason Chat App</h1>
+    <button id="logoutBtn">Logout</button> <!-- Logout Button -->
+    <ul id="friends-list">
+      <li>Friends</li>
+    </ul>
+    <li>Groups</li>
+  </div>
+
+  <div id="main-content">
+    <!-- Blue radar section where client name is moved -->
+    <div id="client-name-header" class="blue-header">
+      <h2 id="client-name"></h2>
+    </div>
+
+    <div class="chat-controls">
+      <button id="menuBtn"><i class="material-icons">menu</i></button> <!-- New nav menu button -->
+      <div id="controlNav" class="control-nav">
+        <button id="callBtn"><i class="material-icons">phone</i></button> <!-- Call icon -->
+        <button id="endCallBtn"><i class="material-icons">call_end</i></button> <!-- End Call icon -->
+        <button id="shareFileBtn"><i class="material-icons">attach_file</i></button> <!-- Share File icon -->
+        <button id="voiceNoteBtn"><i class="material-icons">mic</i></button> <!-- Voice Note icon -->
+        <button id="customThemeBtn"><i class="material-icons">brightness_4</i></button> <!-- Custom Theme icon -->
+        <button id="scheduleMessageBtn"><i class="material-icons">schedule</i></button> <!-- Schedule Message icon -->
+        <button id="chatSummaryBtn"><i class="material-icons">chat</i></button> <!-- Chat Summary icon -->
+        <button id="settingsBtn"><i class="material-icons">settings</i></button> <!-- Settings icon -->
+      </div>
+    </div>
+
+    <div id="profile-section">
+      <h2 id="profile-name"></h2>
+    </div>
+
+    <div id="chat-box" class="chat-box">Have a good conversation!!!</div>
+
+    <div class="message-input-section">
+      <input id="messageInput" type="text" placeholder="Type your message...">
+      <button id="sendBtn">Send</button>
+    </div>
+
+    <!-- User details overlay section -->
+    <div id="user-details-overlay">
+      <div id="cancel-btn">X</div>
+      <h1>User Details</h1>
+      <p id="user-details-name"></p>
+      <p>More user details can go here...</p>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script> <!-- Socket.IO client -->
+  <script>
+    
+    const socket = io();
+
+// Fetch Gmail contacts and display only the name
+async function fetchGmailContacts() {
+  try {
+    const response = await fetch('/contacts');
+    const data = await response.json();
+    return data.contacts;
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
+    return [];
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const friendsList = document.getElementById('friends-list');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const contacts = await fetchGmailContacts();
+
+  contacts.forEach(contact => {
+    const li = document.createElement('li');
+    li.innerHTML = `${contact.name}`; // Show only the name
+
+    // Add click event to display full details
+    li.addEventListener('click', () => {
+      document.getElementById('profile-name').innerText = contact.name;
+      document.getElementById('client-name').innerText = contact.name; // Show in blue header
+
+      document.getElementById('chat-box').style.display = 'block'; // Enable chat
+    });
+
+    friendsList.appendChild(li);
+  });
+
+  // Function to send a message
+  const sendMessage = () => {
+    const message = messageInput.value.trim();
+    if (message) {
+      socket.emit('sendMessage', { message });
+      messageInput.value = ''; // Clear input field
+    }
+  };
+
+  // Add event listener for the send button
+  sendBtn.addEventListener('click', sendMessage);
+
+  // Add event listener for Enter key
+  messageInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent default form submission behavior
+      sendMessage();
+    }
+  });
+});
+
+// Event listener to show user details when clicking on the client name in the blue header
+document.getElementById('client-name').addEventListener('click', () => {
+  const name = document.getElementById('client-name').innerText;
+  if (name) {
+    document.getElementById('user-details-name').innerText = `Name: ${name}`;
+    document.getElementById('user-details-overlay').style.display = 'block';
+  }
+});
+
+// Cancel button to close the user details overlay and return to the chat
+document.getElementById('cancel-btn').addEventListener('click', () => {
+  document.getElementById('user-details-overlay').style.display = 'none';
+});
+
+// Voice note recording
+let mediaRecorder;
+let audioChunks = [];
+document.getElementById('voiceNoteBtn').addEventListener('click', () => {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.start();
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      document.getElementById('chat-box').innerHTML += `<audio controls src="${audioUrl}"></audio>`;
+      audioChunks = [];
+    };
+
+    const stopRecordingBtn = document.createElement('button');
+    stopRecordingBtn.innerText = 'Stop Recording';
+    stopRecordingBtn.addEventListener('click', () => {
+      mediaRecorder.stop();
+    });
+    document.body.appendChild(stopRecordingBtn);
+  });
+});
+
+// Dark/light theme toggle
+document.getElementById('customThemeBtn').addEventListener('click', () => {
+  const theme = prompt("Enter theme: light or dark (default is light)");
+  if (theme === 'dark') {
+    document.body.classList.add('dark');
+    document.body.classList.remove('light');
+  } else {
+    document.body.classList.add('light');
+    document.body.classList.remove('dark');
+  }
+
+  document.getElementById('chat-box').classList.toggle('dark-theme');
+  document.querySelectorAll('.chat-controls button').forEach(button => {
+    button.classList.toggle('dark-theme');
+  });
+});
+
+// File sharing and displaying inline
+document.getElementById('shareFileBtn').addEventListener('click', () => {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '*/*';
+  fileInput.click();
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file) {
+      const fileUrl = URL.createObjectURL(file);
+      const chatBox = document.getElementById('chat-box');
+
+      // Display images directly
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = fileUrl;
+        chatBox.appendChild(img);
+      }
+      // Embed PDFs or documents
+      else if (file.type === 'application/pdf') {
+        const iframe = document.createElement('iframe');
+        iframe.src = fileUrl;
+        chatBox.appendChild(iframe);
+      } else {
+        // For other file types, provide a downloadable link
+        chatBox.innerHTML += `<p>File shared: <a href="${fileUrl}" download="${file.name}">${file.name}</a></p>`;
+      }
+    }
+  });
+});
+
+// Enlarge image on click
+document.addEventListener('click', (e) => {
+  if (e.target.tagName === 'IMG') {
+    const imgSrc = e.target.src;
+    window.open(imgSrc, '_blank');
+  }
+});
+
+// WebSocket logic to display received messages
+socket.on('receiveMessage', (data) => {
+  document.getElementById('chat-box').innerHTML += `<p>${data.message}</p>`;
+});
+
+// Logout button functionality
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  fetch('/logout') // Call logout route to clear cookies
+    .then(() => window.location.href = '/login.html') // Redirect to login page
+    .catch(err => console.error('Logout error:', err));
+});
+
+  </script>
+</body>
+</html>
+

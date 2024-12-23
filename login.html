@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login to Jreason</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="login-section">
+    <h1>Login to Jreason</h1>
+    <input type="text" id="login-username" placeholder="Enter your username">
+    <input type="password" id="login-password" placeholder="Enter your password">
+    <button id="loginBtn">Login</button>
+    <button id="googleLoginBtn">Login with Google</button> <!-- Google Login Button -->
+  </div>
+  <p>Don't have an account? <a href="register.html">Register here</a></p>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginBtn = document.getElementById("loginBtn");
+      const googleLoginBtn = document.getElementById("googleLoginBtn");
+
+      // Regular login
+      loginBtn.addEventListener("click", () => {
+        const username = document.getElementById("login-username").value;
+        const password = document.getElementById("login-password").value;
+
+        const storedUsername = localStorage.getItem("registeredUsername");
+        const storedPassword = localStorage.getItem("registeredPassword");
+
+        if (username === storedUsername && password === storedPassword) {
+          alert("Login successful!");
+          localStorage.setItem("isLoggedIn", "true");
+          window.location.href = "chat-app.html";
+        } else {
+          alert("Invalid username or password.");
+        }
+      });
+
+      // Google login
+      googleLoginBtn.addEventListener("click", () => {
+        window.location.href = "/auth";  // Redirect to Google OAuth flow
+      });
+    });
+  </script>
+</body>
+</html>
